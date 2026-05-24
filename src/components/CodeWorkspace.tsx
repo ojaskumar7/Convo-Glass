@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import Editor from "@monaco-editor/react";
 import { Play, CheckCircle, RotateCcw, Terminal, Code } from "lucide-react";
 import { CODING_QUESTIONS, CodingQuestion } from "../lib/data";
@@ -13,17 +13,20 @@ export default function CodeWorkspace({ onCodeSubmitComplete }: CodeWorkspacePro
   const [questions] = useState<CodingQuestion[]>(CODING_QUESTIONS);
   const [selectedQuestion, setSelectedQuestion] = useState<CodingQuestion>(CODING_QUESTIONS[0]);
   const [language, setLanguage] = useState<"javascript" | "python">("javascript");
-  const [code, setCode] = useState<string>("");
-  const [consoleLogs, setConsoleLogs] = useState<string[]>([]);
+  const [code, setCode] = useState<string>(CODING_QUESTIONS[0].languages.javascript.starter);
+  const [consoleLogs, setConsoleLogs] = useState<string[]>([
+    `System: Loaded problem "${CODING_QUESTIONS[0].title}" in JavaScript.`
+  ]);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  // Load starter code based on selected question and language
-  useEffect(() => {
-    const starter = selectedQuestion.languages[language]?.starter || "";
+  const loadProblem = (question: CodingQuestion, nextLanguage: "javascript" | "python") => {
+    const starter = question.languages[nextLanguage]?.starter || "";
+    setSelectedQuestion(question);
+    setLanguage(nextLanguage);
     setCode(starter);
-    setConsoleLogs([`System: Loaded problem "${selectedQuestion.title}" in ${language === "javascript" ? "JavaScript" : "Python"}.`]);
-  }, [selectedQuestion, language]);
+    setConsoleLogs([`System: Loaded problem "${question.title}" in ${nextLanguage === "javascript" ? "JavaScript" : "Python"}.`]);
+  };
 
   const handleReset = () => {
     if (confirm("Are you sure you want to reset the editor to the starter code?")) {
@@ -66,7 +69,7 @@ export default function CodeWorkspace({ onCodeSubmitComplete }: CodeWorkspacePro
     // Real JS execution sandbox!
     const capturedLogs: string[] = [];
     const originalLog = console.log;
-    console.log = (...args: any[]) => {
+    console.log = (...args: unknown[]) => {
       capturedLogs.push(
         args.map((a) => (typeof a === "object" ? JSON.stringify(a) : String(a))).join(" ")
       );
@@ -164,8 +167,9 @@ export default function CodeWorkspace({ onCodeSubmitComplete }: CodeWorkspacePro
         appendLog(`System: Run finished. ${passedCount}/${selectedQuestion.testCases.length} tests passed.`);
       }
 
-    } catch (err: any) {
-      appendLog(`Compilation/Execution Error: ${err?.message || err}`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      appendLog(`Compilation/Execution Error: ${message}`);
     } finally {
       console.log = originalLog;
       setIsRunning(false);
@@ -253,7 +257,7 @@ export default function CodeWorkspace({ onCodeSubmitComplete }: CodeWorkspacePro
             value={selectedQuestion.id}
             onChange={(e) => {
               const found = questions.find((q) => q.id === e.target.value);
-              if (found) setSelectedQuestion(found);
+              if (found) loadProblem(found, language);
             }}
             style={{
               width: "100%",
@@ -296,7 +300,7 @@ export default function CodeWorkspace({ onCodeSubmitComplete }: CodeWorkspacePro
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <select
               value={language}
-              onChange={(e) => setLanguage(e.target.value as "javascript" | "python")}
+              onChange={(e) => loadProblem(selectedQuestion, e.target.value as "javascript" | "python")}
               style={{
                 background: "rgba(0, 0, 0, 0.3)",
                 border: "1px solid var(--border-color)",

@@ -1,8 +1,51 @@
 import { InterviewerPersona, SessionMetrics } from "./data";
 
+interface SpeechRecognitionAlternative {
+  transcript: string;
+  confidence?: number;
+}
+
+interface SpeechRecognitionResultLike {
+  isFinal: boolean;
+  0: SpeechRecognitionAlternative;
+}
+
+interface SpeechRecognitionResultListLike {
+  length: number;
+  [index: number]: SpeechRecognitionResultLike;
+}
+
+interface SpeechRecognitionEventLike {
+  resultIndex: number;
+  results: SpeechRecognitionResultListLike;
+}
+
+interface SpeechRecognitionErrorEventLike {
+  error: string;
+}
+
+interface SpeechRecognitionLike {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onstart: (() => void) | null;
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEventLike) => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+}
+
+type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;
+
+interface SpeechRecognitionWindow extends Window {
+  SpeechRecognition?: SpeechRecognitionConstructor;
+  webkitSpeechRecognition?: SpeechRecognitionConstructor;
+}
+
 export class SpeechEngine {
   private synthesis: SpeechSynthesis | null = null;
-  private recognition: any = null;
+  private recognition: SpeechRecognitionLike | null = null;
   public isListening = false;
   
   public sessionMetrics: SessionMetrics = {
@@ -29,7 +72,8 @@ export class SpeechEngine {
 
   private setupRecognition() {
     if (typeof window === "undefined") return;
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const speechWindow = window as SpeechRecognitionWindow;
+    const SpeechRecognition = speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition;
     if (SpeechRecognition) {
       this.recognition = new SpeechRecognition();
       this.recognition.continuous = true;
@@ -122,7 +166,7 @@ export class SpeechEngine {
       console.log("Voice capturing started");
     };
 
-    this.recognition.onresult = (event: any) => {
+    this.recognition.onresult = (event) => {
       let interimTranscript = "";
       let finalTranscript = "";
 
@@ -150,7 +194,7 @@ export class SpeechEngine {
       }
     };
 
-    this.recognition.onerror = (event: any) => {
+    this.recognition.onerror = (event) => {
       console.error("Speech Recognition Error:", event.error);
       this.stopListening();
       if (onSpeechEnd) onSpeechEnd(this.sessionMetrics);

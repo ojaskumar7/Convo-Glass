@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import {
   LayoutDashboard,
@@ -11,7 +11,6 @@ import {
   Play,
   Pause,
   CheckCircle,
-  Video,
   VideoOff,
   Bot,
   Mic,
@@ -25,25 +24,14 @@ import {
 
 import {
   INTERVIEW_PERSONAS,
-  CODING_QUESTIONS,
-  SYSTEM_DESIGN_TOPICS,
   InterviewerPersona,
-  CodingQuestion,
-  SystemDesignTopic,
   SessionMetrics
 } from "../../lib/data";
+import type { Chart as ChartType } from "chart.js";
 
 import { getSpeechEngineInstance } from "../../lib/speech";
 import CodeWorkspace from "../../components/CodeWorkspace";
 import SystemDesignCanvas from "../../components/SystemDesignCanvas";
-
-// Safe import and registration of Chart.js on client side
-let ChartClass: any = null;
-if (typeof window !== "undefined") {
-  const { Chart, registerables } = require("chart.js");
-  Chart.register(...registerables);
-  ChartClass = Chart;
-}
 
 interface ChatBubble {
   id: string;
@@ -85,7 +73,7 @@ export default function WorkspacePage() {
 
   // Session Statistics
   const [questionsAsked, setQuestionsAsked] = useState<number>(0);
-  const [sessionMetricsHistory, setSessionMetricsHistory] = useState<SessionMetrics[]>([]);
+  const [, setSessionMetricsHistory] = useState<SessionMetrics[]>([]);
   const [paceVal, setPaceVal] = useState<string>("--");
   const [fillerVal, setFillerVal] = useState<number>(0);
   const [confidenceVal, setConfidenceVal] = useState<number>(0);
@@ -115,22 +103,37 @@ export default function WorkspacePage() {
   ]);
 
   // Chart instances refs for performance analysis
-  const chartScoresRef = useRef<any>(null);
-  const chartSpeechRef = useRef<any>(null);
+  const chartScoresRef = useRef<ChartType | null>(null);
+  const chartSpeechRef = useRef<ChartType | null>(null);
   const scoresCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const speechCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
   // Speech engine reference
   const speechEngine = useRef(getSpeechEngineInstance());
+  const chatIdCounterRef = useRef(0);
+
+  const createChatId = (prefix: string) => {
+    chatIdCounterRef.current += 1;
+    return `${prefix}-${chatIdCounterRef.current}`;
+  };
+
+  const stopWebcam = useCallback(() => {
+    if (webcamStreamRef.current) {
+      webcamStreamRef.current.getTracks().forEach((track) => track.stop());
+      webcamStreamRef.current = null;
+    }
+    setIsWebcamActive(false);
+  }, []);
 
   // Clean speech / video streams on unmount
   useEffect(() => {
+    const engine = speechEngine.current;
     return () => {
-      speechEngine.current.stopSpeaking();
-      speechEngine.current.stopListening();
+      engine.stopSpeaking();
+      engine.stopListening();
       stopWebcam();
     };
-  }, []);
+  }, [stopWebcam]);
 
   // Sync interviewer speech metrics inside the Arena voice loop
   const syncArenaSpeech = () => {
@@ -144,7 +147,7 @@ export default function WorkspacePage() {
       setArenaStatusColor("var(--accent-violet)");
 
       // Create a temporary placeholder bubble for speech transcript
-      const bubbleId = `speech-bubble-${Date.now()}`;
+      const bubbleId = createChatId("speech-bubble");
       if (selectedRound === "behavioral") {
         setChatHistory((prev) => [
           ...prev,
@@ -179,7 +182,7 @@ export default function WorkspacePage() {
               );
             }
             setTimeout(() => {
-              triggerInterviewerReply(finalMetrics);
+              triggerInterviewerReply();
             }, 1200);
           } else {
             if (selectedRound === "behavioral") {
@@ -206,7 +209,7 @@ export default function WorkspacePage() {
     if (selectedRound === "behavioral") {
       setChatHistory((prev) => [
         ...prev,
-        { id: `typed-${Date.now()}`, speaker: "You", text, isUser: true }
+        { id: createChatId("typed"), speaker: "You", text, isUser: true }
       ]);
     }
 
@@ -222,13 +225,13 @@ export default function WorkspacePage() {
       (finalMetrics) => {
         setSessionMetricsHistory((prev) => [...prev, finalMetrics]);
         setTimeout(() => {
-          triggerInterviewerReply(finalMetrics);
+          triggerInterviewerReply();
         }, 1200);
       }
     );
   };
 
-  const triggerInterviewerReply = (userMetrics: SessionMetrics) => {
+  const triggerInterviewerReply = () => {
     setQuestionsAsked((prev) => prev + 1);
     setArenaStatus("AI Interviewer Speaking...");
     setArenaStatusColor("var(--accent-cyan)");
@@ -248,7 +251,7 @@ export default function WorkspacePage() {
       }
       setChatHistory((prev) => [
         ...prev,
-        { id: `ai-reply-${Date.now()}`, speaker: selectedPersona.name, text: reply, isUser: false }
+        { id: createChatId("ai-reply"), speaker: selectedPersona.name, text: reply, isUser: false }
       ]);
     }
 
@@ -346,14 +349,6 @@ export default function WorkspacePage() {
     }
   };
 
-  const stopWebcam = () => {
-    if (webcamStreamRef.current) {
-      webcamStreamRef.current.getTracks().forEach((track) => track.stop());
-      webcamStreamRef.current = null;
-    }
-    setIsWebcamActive(false);
-  };
-
   // Finish Interview & Grade Scorecard
   const handleFinishInterview = () => {
     speechEngine.current.stopSpeaking();
@@ -362,11 +357,6 @@ export default function WorkspacePage() {
     setIsListening(false);
     
     let score = 84;
-    let computedFillers = sessionMetricsHistory.reduce((acc, curr) => acc + curr.fillerCount, 0);
-    let avgConfidence = sessionMetricsHistory.length > 0
-      ? Math.round(sessionMetricsHistory.reduce((acc, curr) => acc + curr.confidenceScore, 0) / sessionMetricsHistory.length)
-      : 85;
-
     if (selectedRound === "coding") {
       score = 88;
       setStrengths([
@@ -440,96 +430,107 @@ export default function WorkspacePage() {
 
   // Analytics Chart rendering
   useEffect(() => {
-    if (currentView !== "analytics" || !scoresCanvasRef.current || !speechCanvasRef.current || !ChartClass) return;
+    if (currentView !== "analytics" || !scoresCanvasRef.current || !speechCanvasRef.current) return;
+    let isCancelled = false;
 
-    // Destroy existing chart instances if they exist
-    if (chartScoresRef.current) chartScoresRef.current.destroy();
-    if (chartSpeechRef.current) chartSpeechRef.current.destroy();
+    async function renderCharts() {
+      const { Chart, registerables } = await import("chart.js");
+      if (isCancelled || !scoresCanvasRef.current || !speechCanvasRef.current) return;
 
-    const accentCyan = "#06b6d4";
-    const accentViolet = "#8b5cf6";
+      Chart.register(...registerables);
 
-    // 1. Scores line chart
-    chartScoresRef.current = new ChartClass(scoresCanvasRef.current, {
-      type: "line",
-      data: {
-        labels: ["Session 1", "Session 2", "Session 3", "Session 4", "Session 5", "Session 6"],
-        datasets: [
-          {
-            label: "Interview Scores",
-            data: [72, 75, 78, 80, 84, 88],
-            borderColor: accentCyan,
-            backgroundColor: "rgba(6, 182, 212, 0.1)",
-            borderWidth: 2,
-            tension: 0.3,
-            fill: true
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: {
-            min: 50,
-            max: 100,
-            grid: { color: "rgba(255, 255, 255, 0.05)" },
-            ticks: { color: "#a1a1aa" }
-          },
-          x: {
-            grid: { display: false },
-            ticks: { color: "#a1a1aa" }
-          }
-        }
-      }
-    });
+      // Destroy existing chart instances if they exist
+      if (chartScoresRef.current) chartScoresRef.current.destroy();
+      if (chartSpeechRef.current) chartSpeechRef.current.destroy();
 
-    // 2. Speech scatter chart
-    chartSpeechRef.current = new ChartClass(speechCanvasRef.current, {
-      type: "scatter",
-      data: {
-        datasets: [
-          {
-            label: "Speech Sessions",
-            data: [
-              { x: 100, y: 5 },
-              { x: 120, y: 3 },
-              { x: 135, y: 2 },
-              { x: 140, y: 1 },
-              { x: 145, y: 0 }
-            ],
-            backgroundColor: accentViolet,
-            borderColor: "rgba(139, 92, 246, 0.5)",
-            borderWidth: 2,
-            pointRadius: 6
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: {
-            title: { display: true, text: "Filler Words Count", color: "#a1a1aa" },
-            min: 0,
-            max: 6,
-            grid: { color: "rgba(255, 255, 255, 0.05)" },
-            ticks: { color: "#a1a1aa", stepSize: 1 }
-          },
-          x: {
-            title: { display: true, text: "Pace (Words Per Minute)", color: "#a1a1aa" },
-            min: 80,
-            max: 180,
-            grid: { color: "rgba(255, 255, 255, 0.05)" },
-            ticks: { color: "#a1a1aa" }
+      const accentCyan = "#06b6d4";
+      const accentViolet = "#8b5cf6";
+
+      // 1. Scores line chart
+      chartScoresRef.current = new Chart(scoresCanvasRef.current, {
+        type: "line",
+        data: {
+          labels: ["Session 1", "Session 2", "Session 3", "Session 4", "Session 5", "Session 6"],
+          datasets: [
+            {
+              label: "Interview Scores",
+              data: [72, 75, 78, 80, 84, 88],
+              borderColor: accentCyan,
+              backgroundColor: "rgba(6, 182, 212, 0.1)",
+              borderWidth: 2,
+              tension: 0.3,
+              fill: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: {
+              min: 50,
+              max: 100,
+              grid: { color: "rgba(255, 255, 255, 0.05)" },
+              ticks: { color: "#a1a1aa" }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: "#a1a1aa" }
+            }
           }
         }
-      }
-    });
+      });
+
+      // 2. Speech scatter chart
+      chartSpeechRef.current = new Chart(speechCanvasRef.current, {
+        type: "scatter",
+        data: {
+          datasets: [
+            {
+              label: "Speech Sessions",
+              data: [
+                { x: 100, y: 5 },
+                { x: 120, y: 3 },
+                { x: 135, y: 2 },
+                { x: 140, y: 1 },
+                { x: 145, y: 0 }
+              ],
+              backgroundColor: accentViolet,
+              borderColor: "rgba(139, 92, 246, 0.5)",
+              borderWidth: 2,
+              pointRadius: 6
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: {
+              title: { display: true, text: "Filler Words Count", color: "#a1a1aa" },
+              min: 0,
+              max: 6,
+              grid: { color: "rgba(255, 255, 255, 0.05)" },
+              ticks: { color: "#a1a1aa", stepSize: 1 }
+            },
+            x: {
+              title: { display: true, text: "Pace (Words Per Minute)", color: "#a1a1aa" },
+              min: 80,
+              max: 180,
+              grid: { color: "rgba(255, 255, 255, 0.05)" },
+              ticks: { color: "#a1a1aa" }
+            }
+          }
+        }
+      });
+    }
+
+    renderCharts();
 
     return () => {
+      isCancelled = true;
       if (chartScoresRef.current) chartScoresRef.current.destroy();
       if (chartSpeechRef.current) chartSpeechRef.current.destroy();
     };
@@ -982,7 +983,7 @@ export default function WorkspacePage() {
                 {selectedRound === "coding" && (
                   <div style={{ display: "flex", flexDirection: "column", height: "100%", padding: "12px" }}>
                     <CodeWorkspace
-                      onCodeSubmitComplete={(feedback) => {
+                      onCodeSubmitComplete={() => {
                         setArenaStatus("AI Interviewer Speaking...");
                         setArenaStatusColor("var(--accent-cyan)");
                         setIsSpeaking(true);

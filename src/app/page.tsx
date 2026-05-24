@@ -103,9 +103,10 @@ export default function LandingPage() {
 
   // Clean speech engine on unmount
   useEffect(() => {
+    const engine = speechEngine.current;
     return () => {
-      speechEngine.current.stopSpeaking();
-      speechEngine.current.stopListening();
+      engine.stopSpeaking();
+      engine.stopListening();
     };
   }, []);
 
@@ -448,7 +449,7 @@ export default function LandingPage() {
       <section className="section" id="features">
         <span className="section-tag">Features</span>
         <h2 className="section-title">Everything You Need to Get Offer-Ready</h2>
-        <p className="section-subtitle">ConvoGlass is not a static list of questions. It's a dynamic, full-stack coaching platform powered by real conversation logic.</p>
+        <p className="section-subtitle">ConvoGlass is not a static list of questions. It&apos;s a dynamic, full-stack coaching platform powered by real conversation logic.</p>
         
         <div className="features-grid">
           <div className="feature-card glass-panel">

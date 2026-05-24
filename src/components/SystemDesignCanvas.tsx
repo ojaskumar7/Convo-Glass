@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import { MousePointer, Square, Database, Cloud, ArrowUpRight, Type, Trash2 } from "lucide-react";
 
 interface Node {
@@ -60,29 +60,7 @@ export default function SystemDesignCanvas() {
     tempY: 0
   });
 
-  // Handle resize to container
-  useEffect(() => {
-    const handleResize = () => {
-      const canvas = canvasRef.current;
-      const container = containerRef.current;
-      if (!canvas || !container) return;
-      const rect = container.getBoundingClientRect();
-      canvas.width = rect.width;
-      canvas.height = rect.height || 450;
-      drawCanvas();
-    };
-
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [nodes, connections]); // Trigger resize and redraw if structural changes happen
-
-  // Redraw when node states or tool states change
-  useEffect(() => {
-    drawCanvas();
-  }, [nodes, connections, tool]);
-
-  const drawCanvas = () => {
+  const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -244,7 +222,29 @@ export default function SystemDesignCanvas() {
       const textY = node.y + node.h / 2;
       ctx.fillText(node.label, textX, textY);
     });
-  };
+  }, [connections, nodes]);
+
+  // Handle resize to container
+  useEffect(() => {
+    const handleResize = () => {
+      const canvas = canvasRef.current;
+      const container = containerRef.current;
+      if (!canvas || !container) return;
+      const rect = container.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height || 450;
+      drawCanvas();
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [drawCanvas]);
+
+  // Redraw when node states or tool states change
+  useEffect(() => {
+    drawCanvas();
+  }, [drawCanvas, tool]);
 
   const getNodeAtPosition = (x: number, y: number): Node | null => {
     // Loop backwards for top layer nodes first
