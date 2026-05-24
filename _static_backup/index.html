@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ConvoGlass | AI-Powered Mock Interview Practice Platform</title>
+  <meta name="description" content="Master your software engineering, system design, and behavioral interviews with ConvoGlass. Experience real-time adaptive AI coaching and speech analysis.">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <!-- Background Glows -->
+  <div class="bg-glow-sphere" style="top: 10%; left: 5%;"></div>
+  <div class="bg-glow-cyan" style="top: 40%; right: 10%;"></div>
+  <div class="bg-glow-sphere" style="bottom: 10%; left: 20%;"></div>
+
+  <!-- Header Section -->
+  <header>
+    <div class="nav-container">
+      <a href="index.html" class="logo">
+        <i data-lucide="glass-water" style="stroke: url(#logo-grad); stroke-width: 2.5;"></i>
+        <span>ConvoGlass</span>
+      </a>
+      <!-- SVG Gradient definition for Lucide icon -->
+      <svg width="0" height="0">
+        <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#06b6d4" />
+          <stop offset="100%" stop-color="#8b5cf6" />
+        </linearGradient>
+      </svg>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="#features">Features</a></li>
+          <li><a href="#demo">Live Demo</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </nav>
+      <div>
+        <a href="app.html" class="btn btn-primary" id="header-launch-btn">
+          Launch App
+          <i data-lucide="arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="badge-tag">
+      <i data-lucide="sparkles" size="14"></i>
+      <span>Next-Gen AI Interview Coaching</span>
+    </div>
+    <h1 class="hero-title">
+      Master Your Technical & Behavioral Interviews with <span>Conversational AI</span>
+    </h1>
+    <p class="hero-subtitle">
+      ConvoGlass simulates realistic, resume-aware mock interviews with real-time speech analytics, adaptive coding environments, and system design whiteboards.
+    </p>
+    <div class="hero-ctas">
+      <a href="app.html" class="btn btn-primary btn-cyan">
+        <i data-lucide="terminal"></i>
+        Start Practicing Free
+      </a>
+      <a href="#demo" class="btn btn-secondary">
+        <i data-lucide="play-circle"></i>
+        Try Mini-Demo
+      </a>
+    </div>
+
+    <!-- Interactive Teaser Box -->
+    <div class="teaser-container" id="demo">
+      <div class="section-tag">Interactive Teaser</div>
+      <h2 class="section-title" style="font-size: 1.8rem; margin-bottom: 24px;">Test Drive Your AI Interviewer</h2>
+      
+      <div class="teaser-dashboard glass-panel">
+        <!-- Sidebar: Choose persona -->
+        <div class="teaser-sidebar">
+          <div>
+            <h3 class="teaser-subtitle">1. SELECT AN INTERVIEWER</h3>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <button class="persona-btn active" data-persona-id="friendly-fred">
+                <span class="persona-avatar">😊</span>
+                <div>
+                  <div class="persona-name">Friendly Fred</div>
+                  <div class="persona-desc">HR & Behavioral Round</div>
+                </div>
+              </button>
+              <button class="persona-btn" data-persona-id="strict-sarah">
+                <span class="persona-avatar">🤨</span>
+                <div>
+                  <div class="persona-name">Strict Sarah</div>
+                  <div class="persona-desc">System Design Lead</div>
+                </div>
+              </button>
+              <button class="persona-btn" data-persona-id="faang-frank">
+                <span class="persona-avatar">😎</span>
+                <div>
+                  <div class="persona-name">FAANG Frank</div>
+                  <div class="persona-desc">Senior Coding Manager</div>
+                </div>
+              </button>
+            </div>
+          </div>
+          
+          <div style="margin-top: auto;">
+            <h3 class="teaser-subtitle">2. START SCENARIO</h3>
+            <button class="btn btn-primary" id="listen-question-btn" style="width: 100%;">
+              <i data-lucide="volume-2"></i>
+              Listen to Question
+            </button>
+          </div>
+        </div>
+
+        <!-- Chat Viewport -->
+        <div class="teaser-content">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <div class="teaser-title">
+                <i data-lucide="bot" class="text-cyan"></i>
+                <span id="demo-persona-title">Friendly Fred</span>
+                <span id="demo-persona-role" style="font-size:0.75rem; font-weight:normal; color:var(--text-secondary); background:rgba(255,255,255,0.05); padding:2px 8px; border-radius:4px;">Behavioral Coach</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--accent-emerald);">
+                <span style="display:inline-block; width:8px; height:8px; background:var(--accent-emerald); border-radius:50%; animation: pulse-glow 1.5s infinite;"></span>
+                Live Audio Feed
+              </div>
+            </div>
+            
+            <!-- Video waveform screen -->
+            <div class="avatar-card">
+              <div class="avatar-speaking-glow"></div>
+              <div class="avatar-video-placeholder">
+                <span class="avatar-image">😊</span>
+                <span style="font-size: 0.85rem; font-weight: 500;">Simulated Video Feed</span>
+              </div>
+            </div>
+            
+            <div class="wave-container">
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+            </div>
+          </div>
+
+          <!-- Question / Answer Transcript Container -->
+          <div>
+            <div class="demo-dialogue">
+              <div>
+                <div class="dialogue-speaker" id="dialogue-speaker-name">Friendly Fred</div>
+                <div class="dialogue-text" id="dialogue-content">
+                  Click "Listen to Question" above to start a conversation.
+                </div>
+              </div>
+            </div>
+
+            <!-- User Response inputs -->
+            <div class="demo-input-container">
+              <button class="speech-btn" id="mic-record-btn" title="Speak Answer">
+                <i data-lucide="mic"></i>
+              </button>
+              <input type="text" class="text-input-field" id="text-answer-input" placeholder="Type your response here or click the mic to speak...">
+              <button class="btn btn-primary" id="submit-answer-btn" style="padding: 14px 20px;">
+                <i data-lucide="send"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Live metrics gauges -->
+          <div class="demo-metrics" style="margin-top: 15px;">
+            <div class="metric-mini-card">
+              <div class="metric-mini-val" id="pace-metric-val">--</div>
+              <div class="metric-mini-label">Speaking Pace</div>
+            </div>
+            <div class="metric-mini-card">
+              <div class="metric-mini-val" id="filler-metric-val">0</div>
+              <div class="metric-mini-label">Filler Words</div>
+            </div>
+            <div class="metric-mini-card">
+              <div class="metric-mini-val" id="confidence-metric-val">0%</div>
+              <div class="metric-mini-label">Confidence</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Core Features Section -->
+  <section class="section" id="features">
+    <span class="section-tag">Features</span>
+    <h2 class="section-title">Everything You Need to Get Offer-Ready</h2>
+    <p class="section-subtitle">ConvoGlass is not a static list of questions. It's a dynamic, full-stack coaching platform powered by real conversation logic.</p>
+    
+    <div class="features-grid">
+      <div class="feature-card glass-panel">
+        <div class="feature-icon-wrapper">
+          <i data-lucide="speech"></i>
+        </div>
+        <h3>Real-time Speech Intelligence</h3>
+        <p>Tracks filler words (um, like, basically), measures speaking pace (WPM), and calculates confidence level dynamically during your mocks.</p>
+      </div>
+
+      <div class="feature-card glass-panel">
+        <div class="feature-icon-wrapper">
+          <i data-lucide="code-2"></i>
+        </div>
+        <h3>Technical Coding Sandbox</h3>
+        <p>A full Monaco Editor layout supporting syntax highlighting, test-case verification, and live algorithmic code execution feedback.</p>
+      </div>
+
+      <div class="feature-card glass-panel">
+        <div class="feature-icon-wrapper">
+          <i data-lucide="milestone"></i>
+        </div>
+        <h3>System Design Whiteboard</h3>
+        <p>Interactive drawing canvas allowing you to design system diagrams (databases, API servers, message queues) while the AI questions your trade-offs.</p>
+      </div>
+
+      <div class="feature-card glass-panel">
+        <div class="feature-icon-wrapper">
+          <i data-lucide="file-text"></i>
+        </div>
+        <h3>Resume-Aware Rounds</h3>
+        <p>Upload your resume to have our AI analyze your projects, tech stacks, and experiences to craft deep follow-up questions testing shallow understanding.</p>
+      </div>
+
+      <div class="feature-card glass-panel">
+        <div class="feature-icon-wrapper">
+          <i data-lucide="line-chart"></i>
+        </div>
+        <h3>Comprehensive Feedback Engine</h3>
+        <p>Recieve detailed reports grading structural communication (STAR method), technical correctness, system thinking, and custom path roadmaps.</p>
+      </div>
+
+      <div class="feature-card glass-panel">
+        <div class="feature-icon-wrapper">
+          <i data-lucide="users"></i>
+        </div>
+        <h3>Interviewer Personas</h3>
+        <p>Practice against distinct interview personalities: from encouraging, behavioral-focused HR reps to silent, high-pressure FAANG leads.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Platform Showcase / Tabs -->
+  <section class="section">
+    <span class="section-tag">Interactive Preview</span>
+    <h2 class="section-title">Explore the Environments</h2>
+    <p class="section-subtitle">Take a tour of our specialized interview workspaces built to emulate real-world settings.</p>
+
+    <div class="mockup-showcase">
+      <div class="mockup-desc">
+        <div class="mockup-tabs">
+          <button class="mockup-tab-btn active" data-tab="coding">Coding Round</button>
+          <button class="mockup-tab-btn" data-tab="canvas">System Design</button>
+          <button class="mockup-tab-btn" data-tab="analytics">Feedback Dashboard</button>
+        </div>
+        <div>
+          <h3 id="showcase-title" style="font-family: var(--font-heading); font-size: 1.5rem; font-weight: 700; margin-bottom: 12px;">Realistic Coding Environment</h3>
+          <p id="showcase-text" style="color: var(--text-secondary); margin-bottom: 20px;">
+            Write cleaner code with live interviewer check-ins. ConvoGlass loads a complete editor supporting multi-language layouts, automatic test cases, execution output panels, and an AI chat assistant challenging your algorithms.
+          </p>
+          <a href="app.html" class="btn btn-primary">Try Interactive App</a>
+        </div>
+      </div>
+
+      <!-- Preview Panels -->
+      <div class="mockup-visual glass-panel">
+        <!-- Slide 1: Coding -->
+        <div class="mockup-slide active" id="mockup-coding">
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px;">
+            <div style="font-family:var(--font-code); font-size:0.85rem; color:var(--accent-cyan);">solution.js</div>
+            <div style="background:rgba(255,255,255,0.05); padding:2px 8px; border-radius:4px; font-size:0.75rem;">JavaScript</div>
+          </div>
+          <pre style="font-family:var(--font-code); font-size:0.85rem; color: #a5d6ff; line-height: 1.5;">
+<span style="color:#ff7b72;">function</span> <span style="color:#d2a8ff;">lruCache</span>(capacity) {
+  <span style="color:#ff7b72;">this</span>.capacity <span style="color:#ff7b72;">=</span> capacity;
+  <span style="color:#ff7b72;">this</span>.map <span style="color:#ff7b72;">=</span> <span style="color:#ff7b72;">new</span> <span style="color:#d2a8ff;">Map</span>();
+}
+
+<span style="color:#8b949e;">// Get cache item and refresh keys</span>
+<span style="color:#d2a8ff;">LRUCache</span>.prototype.get <span style="color:#ff7b72;">=</span> <span style="color:#ff7b72;">function</span>(key) {
+  <span style="color:#ff7b72;">if</span> (<span style="color:#ff7b72;">!</span><span style="color:#ff7b72;">this</span>.map.has(key)) <span style="color:#ff7b72;">return</span> <span style="color:#79c0ff;">-1</span>;
+  <span style="color:#ff7b72;">const</span> value <span style="color:#ff7b72;">=</span> <span style="color:#ff7b72;">this</span>.map.get(key);
+  <span style="color:#ff7b72;">this</span>.map.delete(key);
+  <span style="color:#ff7b72;">this</span>.map.set(key, value);
+  <span style="color:#ff7b72;">return</span> value;
+};</pre>
+          <div style="margin-top:auto; background:rgba(0,0,0,0.3); padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);">
+            <div style="font-size:0.75rem; color:var(--text-secondary); text-transform:uppercase; margin-bottom:4px;">Test Output</div>
+            <div style="font-family:var(--font-code); font-size:0.8rem; color:var(--accent-emerald);">✓ Test Case 1 Passed (LRUCache initialization)</div>
+            <div style="font-family:var(--font-code); font-size:0.8rem; color:var(--accent-emerald);">✓ Test Case 2 Passed (Eviction sequence correct)</div>
+          </div>
+        </div>
+
+        <!-- Slide 2: System Design -->
+        <div class="mockup-slide" id="mockup-canvas" style="display:flex; justify-content:center; align-items:center;">
+          <div style="position:relative; width:90%; height:90%; border:1px dashed rgba(255,255,255,0.15); border-radius:10px; display:flex; justify-content:center; align-items:center; background:rgba(0,0,0,0.2);">
+            <!-- Mock whiteboard nodes -->
+            <div style="position:absolute; top:20px; left:20px; padding:8px 16px; border:1px solid var(--accent-cyan); background:rgba(6,182,212,0.1); border-radius:8px; font-size:0.8rem;">Client App</div>
+            
+            <div style="position:absolute; top:20px; left:160px; padding:8px 16px; border:1px solid var(--accent-violet); background:rgba(139,92,246,0.1); border-radius:8px; font-size:0.8rem;">Load Balancer</div>
+            
+            <div style="position:absolute; top:110px; left:160px; padding:8px 16px; border:1px solid var(--accent-violet); background:rgba(139,92,246,0.1); border-radius:8px; font-size:0.8rem;">API Servers</div>
+            
+            <div style="position:absolute; top:110px; left:320px; padding:8px 16px; border:1px solid var(--accent-emerald); background:rgba(16,185,129,0.1); border-radius:8px; font-size:0.8rem;">Redis Cache</div>
+            
+            <div style="position:absolute; top:200px; left:160px; padding:8px 16px; border:1px solid var(--accent-rose); background:rgba(244,63,94,0.1); border-radius:8px; font-size:0.8rem;">PostgreSQL (Primary)</div>
+            
+            <!-- Connection lines SVG representation -->
+            <svg style="position:absolute; width:100%; height:100%; top:0; left:0; pointer-events:none;">
+              <defs>
+                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="#a1a1aa"/>
+                </marker>
+              </defs>
+              <line x1="90" y1="40" x2="155" y2="40" stroke="#a1a1aa" stroke-dasharray="4" stroke-width="1.5" marker-end="url(#arrow)"/>
+              <line x1="210" y1="58" x2="210" y2="105" stroke="#a1a1aa" stroke-width="1.5" marker-end="url(#arrow)"/>
+              <line x1="250" y1="130" x2="315" y2="130" stroke="#a1a1aa" stroke-width="1.5" marker-end="url(#arrow)"/>
+              <line x1="210" y1="148" x2="210" y2="195" stroke="#a1a1aa" stroke-dasharray="4" stroke-width="1.5" marker-end="url(#arrow)"/>
+            </svg>
+            <div style="position:absolute; bottom:15px; font-size:0.75rem; color:var(--text-secondary);">Interactive whiteboarding challenges scalability trade-offs</div>
+          </div>
+        </div>
+
+        <!-- Slide 3: Analytics -->
+        <div class="mockup-slide" id="mockup-analytics" style="padding: 24px; display:flex; flex-direction:column; gap:16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-family:var(--font-heading); font-weight:700; font-size:1.1rem;">Interview Evaluation Report</div>
+            <div style="font-size:0.8rem; background:rgba(16,185,129,0.1); color:var(--accent-emerald); padding:4px 10px; border-radius:12px; font-weight:600;">PASS</div>
+          </div>
+          
+          <!-- Rating scale indicators -->
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+            <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:8px; padding:12px;">
+              <div style="font-size:0.75rem; color:var(--text-secondary); text-transform:uppercase;">Overall Score</div>
+              <div style="font-size:1.8rem; font-weight:800; color:var(--accent-cyan); margin:4px 0;">88 <span style="font-size:1rem; color:var(--text-secondary); font-weight:normal;">/ 100</span></div>
+              <div style="font-size:0.75rem; color:var(--accent-emerald);">Top 5% of candidates</div>
+            </div>
+            
+            <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:8px; padding:12px;">
+              <div style="font-size:0.75rem; color:var(--text-secondary); text-transform:uppercase;">Speech Clarity</div>
+              <div style="font-size:1.8rem; font-weight:800; color:var(--accent-violet); margin:4px 0;">92%</div>
+              <div style="font-size:0.75rem; color:var(--text-secondary);">Filler words: 1.2% (Excellent)</div>
+            </div>
+          </div>
+
+          <!-- Radar metrics breakdown -->
+          <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:3px;">
+                <span>Algorithmic Optimization</span>
+                <span class="text-cyan">85%</span>
+              </div>
+              <div style="width:100%; height:6px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden;">
+                <div style="width:85%; height:100%; background:var(--accent-cyan); border-radius:3px;"></div>
+              </div>
+            </div>
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:3px;">
+                <span>System Scalability Design</span>
+                <span class="text-violet">90%</span>
+              </div>
+              <div style="width:100%; height:6px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden;">
+                <div style="width:90%; height:100%; background:var(--accent-violet); border-radius:3px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing section -->
+  <section class="section" id="pricing">
+    <span class="section-tag">Pricing</span>
+    <h2 class="section-title">Flexible Plans for Every Stage</h2>
+    <p class="section-subtitle">Accelerate your preparations and land your dream job with flexible memberships.</p>
+
+    <div class="pricing-grid">
+      <div class="pricing-card glass-panel">
+        <div class="pricing-header">
+          <h3>Starter</h3>
+          <p style="color: var(--text-secondary); font-size: 0.9rem;">Test the waters and practice core behavioral questions.</p>
+          <div class="pricing-price">$0 <span>/ forever</span></div>
+        </div>
+        <ul class="pricing-features">
+          <li>3 AI Mock Interviews / month</li>
+          <li>Basic HR & behavioral rounds</li>
+          <li>Speech pace tracking</li>
+          <li>Limited test cases</li>
+        </ul>
+        <a href="app.html" class="btn btn-secondary" style="margin-top: auto;">Get Started</a>
+      </div>
+
+      <div class="pricing-card glass-panel premium-tier">
+        <div class="pricing-header">
+          <h3>Pro Practitioner</h3>
+          <p style="color: var(--text-secondary); font-size: 0.9rem;">Complete access to premium technical environments.</p>
+          <div class="pricing-price">$29 <span>/ month</span></div>
+        </div>
+        <ul class="pricing-features">
+          <li>Unlimited AI Mock Interviews</li>
+          <li>Resume-Aware questioning</li>
+          <li>Monaco Coding Rounds</li>
+          <li>System Design Drawing Whiteboard</li>
+          <li>Full transcript & replay storage</li>
+          <li>Company-Specific patterns (Google/Meta)</li>
+        </ul>
+        <a href="app.html" class="btn btn-primary" style="margin-top: auto;">Upgrade Now</a>
+      </div>
+
+      <div class="pricing-card glass-panel">
+        <div class="pricing-header">
+          <h3>Enterprise / Bootcamp</h3>
+          <p style="color: var(--text-secondary); font-size: 0.9rem;">Custom portals and bulk pricing for schools and teams.</p>
+          <div class="pricing-price">Custom <span>/ contact us</span></div>
+        </div>
+        <ul class="pricing-features">
+          <li>Everything in Pro</li>
+          <li>Custom interviewer personas</li>
+          <li>Recruiting feedback dashboards</li>
+          <li>Candidate matching intelligence</li>
+          <li>SLA and administrative tools</li>
+        </ul>
+        <a href="mailto:support@convoglass.com" class="btn btn-secondary" style="margin-top: auto;">Contact Sales</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Accordion section -->
+  <section class="section" id="faq">
+    <span class="section-tag">FAQ</span>
+    <h2 class="section-title">Frequently Asked Questions</h2>
+    <p class="section-subtitle">Find responses to standard questions about how ConvoGlass operates.</p>
+
+    <div class="faq-container">
+      <div class="faq-item glass-panel">
+        <div class="faq-question">
+          <span>How does the AI analyze my speech in real-time?</span>
+          <span class="faq-toggle-icon">+</span>
+        </div>
+        <div class="faq-answer">
+          ConvoGlass integrates the built-in browser Web Speech API to capture speech data locally. It measures factors like speaking pace (Words Per Minute), pause length, and uses NLP checks to identify filler phrases ('um', 'like', 'you know') to calculate your structural confidence score.
+        </div>
+      </div>
+
+      <div class="faq-item glass-panel">
+        <div class="faq-question">
+          <span>Are the questions tailored to my specific resume?</span>
+          <span class="faq-toggle-icon">+</span>
+        </div>
+        <div class="faq-answer">
+          Yes! When you upload your resume, the ConvoGlass engine parses your projects, technical skills, and work experiences. The AI interviewer then structures direct, conversational questions testing the depth of your projects, simulating real follow-up checks.
+        </div>
+      </div>
+
+      <div class="faq-item glass-panel">
+        <div class="faq-question">
+          <span>Do I need to download any extensions or packages?</span>
+          <span class="faq-toggle-icon">+</span>
+        </div>
+        <div class="faq-answer">
+          No. ConvoGlass runs entirely in your web browser. There is no software to download. We load syntax editors and whiteboard layers dynamically.
+        </div>
+      </div>
+
+      <div class="faq-item glass-panel">
+        <div class="faq-question">
+          <span>What companies are supported in the mocks?</span>
+          <span class="faq-toggle-icon">+</span>
+        </div>
+        <div class="faq-answer">
+          We support specific patterns reflecting the expectations of top-tier companies, including Google (algorithmic complexity), Amazon (leadership principles & system architecture), Meta (product architecture & speed coding), and typical startup profiles.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer section -->
+  <footer>
+    <div class="footer-container">
+      <div class="footer-brand">
+        <a href="index.html" class="logo">
+          <i data-lucide="glass-water" style="stroke: url(#logo-grad); stroke-width: 2.5;"></i>
+          <span>ConvoGlass</span>
+        </a>
+        <p>Empowering candidates to become interview-ready through conversational intelligence and adaptive simulation.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#demo">Live Teaser</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+          <li><a href="app.html">Launch App</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <ul>
+          <li><a href="#">Preparation Roadmap</a></li>
+          <li><a href="#">Success Stories</a></li>
+          <li><a href="#">FAQ Guide</a></li>
+          <li><a href="#">Help Center</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="#">Cookie Preferences</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>&copy; 2026 ConvoGlass Inc. All rights reserved.</div>
+      <div style="display:flex; gap:16px;">
+        <a href="#" style="color:var(--text-muted);"><i data-lucide="twitter" size="18"></i></a>
+        <a href="#" style="color:var(--text-muted);"><i data-lucide="github" size="18"></i></a>
+        <a href="#" style="color:var(--text-muted);"><i data-lucide="linkedin" size="18"></i></a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/speech.js"></script>
+  <script src="js/landing.js"></script>
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+  </script>
+</body>
+</html>

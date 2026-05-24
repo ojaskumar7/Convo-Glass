@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ConvoGlass Workspace | Mock Interview Console</title>
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js for premium analytics report -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Monaco Editor Loader -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+  
+  <style>
+    /* Application Specific Styles */
+    body {
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+    }
+    
+    .app-container {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      background: var(--bg-primary);
+    }
+
+    /* Sidebar */
+    .app-sidebar {
+      width: 260px;
+      background: rgba(6, 3, 20, 0.85);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 16px;
+      z-index: 10;
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 32px;
+      padding: 0 8px;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .menu-item:hover, .menu-item.active {
+      background: rgba(139, 92, 246, 0.1);
+      color: #fff;
+    }
+
+    .menu-item.active {
+      border: 1px solid rgba(139, 92, 246, 0.2);
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-violet) 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* Main Workspace */
+    .app-content {
+      flex: 1;
+      height: 100%;
+      overflow-y: auto;
+      padding: 30px;
+      position: relative;
+    }
+
+    /* App Views */
+    .app-view {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .app-view.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Resume Parser Upload Card */
+    .resume-upload-zone {
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      padding: 30px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.01);
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .resume-upload-zone:hover {
+      border-color: var(--accent-violet);
+      background: rgba(139, 92, 246, 0.05);
+    }
+
+    /* Setup Grid Configuration */
+    .setup-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .setup-option-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .setup-option-card:hover, .setup-option-card.selected {
+      border-color: var(--accent-cyan);
+      background: rgba(6, 182, 212, 0.05);
+    }
+
+    .setup-option-card.selected {
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.15);
+    }
+
+    /* Grid dashboard widgets */
+    .dashboard-metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .metric-card {
+      padding: 24px;
+      position: relative;
+    }
+
+    .metric-title {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .metric-value {
+      font-family: var(--font-heading);
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin: 8px 0;
+    }
+
+    /* Arena View Layout */
+    .arena-layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 20px;
+      height: calc(100vh - 100px);
+    }
+
+    .arena-left {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      height: 100%;
+    }
+
+    .arena-right {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    /* Camera Feed */
+    .camera-card {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      border-radius: 12px;
+      background: #110d29;
+      border: 1px solid var(--border-color);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .camera-placeholder {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: var(--text-secondary);
+    }
+
+    .camera-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1); /* mirror */
+      display: none;
+    }
+
+    /* Coding editor styling */
+    .editor-container {
+      flex: 1;
+      min-height: 300px;
+      background: #1e1e1e;
+      position: relative;
+    }
+
+    /* Canvas Drawing Toolbar */
+    .canvas-toolbar {
+      display: flex;
+      gap: 8px;
+      padding: 12px;
+      background: rgba(10, 5, 28, 0.9);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .canvas-tool-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .canvas-tool-btn:hover, .canvas-tool-btn.active {
+      background: rgba(139, 92, 246, 0.15);
+      border-color: var(--accent-violet);
+      color: #fff;
+    }
+
+    .canvas-workspace {
+      flex: 1;
+      position: relative;
+      background: #0b071e;
+      overflow: hidden;
+    }
+
+    .canvas-element {
+      position: absolute;
+      cursor: move;
+    }
+
+    /* Modal dialog overrides */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(3, 0, 20, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition-smooth);
+    }
+
+    .modal-backdrop.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-card {
+      width: 90%;
+      max-width: 500px;
+      padding: 32px;
+    }
+
+    /* Feedback scorecard */
+    .report-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 30px;
+    }
+
+    .badge-pass {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-emerald);
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <div class="app-sidebar">
+      <div class="sidebar-header">
+        <a href="index.html" class="logo" style="font-size: 1.35rem;">
+          <i data-lucide="glass-water" style="stroke: url(#logo-grad-app); stroke-width: 2.5;"></i>
+          <span>ConvoGlass</span>
+        </a>
+        <svg width="0" height="0">
+          <linearGradient id="logo-grad-app" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#06b6d4" />
+            <stop offset="100%" stop-color="#8b5cf6" />
+          </linearGradient>
+        </svg>
+      </div>
+
+      <nav style="flex:1;">
+        <ul class="sidebar-menu">
+          <li>
+            <div class="menu-item active" id="menu-dash" onclick="switchView('dashboard')">
+              <i data-lucide="layout-dashboard"></i>
+              Dashboard
+            </div>
+          </li>
+          <li>
+            <div class="menu-item" id="menu-arena" onclick="switchView('arena')">
+              <i data-lucide="terminal"></i>
+              Practice Arena
+            </div>
+          </li>
+          <li>
+            <div class="menu-item" id="menu-analytics" onclick="switchView('analytics')">
+              <i data-lucide="bar-chart-3"></i>
+              Performance
+            </div>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-avatar">JD</div>
+        <div>
+          <div style="font-size: 0.85rem; font-weight: 600;">Jane Doe</div>
+          <div style="font-size: 0.75rem; color: var(--text-secondary);">Pro Practicioner</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Workspace Content -->
+    <div class="app-content">
+      <div class="bg-glow-sphere" style="top:-10%; right:-10%;"></div>
+      
+      <!-- 1. DASHBOARD VIEW -->
+      <div class="app-view active" id="view-dashboard">
+        <h2 style="font-family: var(--font-heading); font-size: 1.8rem; font-weight:800; margin-bottom: 24px;">Welcome back, Jane!</h2>
+        
+        <div class="dashboard-metrics">
+          <div class="glass-panel metric-card">
+            <span class="metric-title">Average Score</span>
+            <div class="metric-value text-cyan">82%</div>
+            <span style="font-size: 0.8rem; color: var(--accent-emerald);">↑ 4% this week</span>
+          </div>
+          <div class="glass-panel metric-card">
+            <span class="metric-title">Mocks Completed</span>
+            <div class="metric-value text-violet">12</div>
+            <span style="font-size: 0.8rem; color: var(--text-secondary);">Goal: 20 per month</span>
+          </div>
+          <div class="glass-panel metric-card">
+            <span class="metric-title">Filler Word Rate</span>
+            <div class="metric-value text-rose">1.8%</div>
+            <span style="font-size: 0.8rem; color: var(--accent-emerald);">↓ 0.5% lower</span>
+          </div>
+          <div class="glass-panel metric-card">
+            <span class="metric-title">Practice Duration</span>
+            <div class="metric-value">8.5h</div>
+            <span style="font-size: 0.8rem; color: var(--text-secondary);">2.4h coding edit</span>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1.4fr 1fr; gap: 24px;">
+          <!-- Setup Wizard Panel -->
+          <div class="glass-panel" style="padding: 24px;">
+            <h3 style="font-family: var(--font-heading); font-weight: 700; font-size:1.25rem; margin-bottom: 16px;">Configure Practice Mock Session</h3>
+            
+            <!-- Resume parsed helper -->
+            <div style="margin-bottom: 20px;">
+              <div style="font-size:0.8rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase; margin-bottom:8px;">Resume Customization (Optional)</div>
+              <div class="resume-upload-zone" id="resume-upload-box">
+                <i data-lucide="file-up" style="color:var(--accent-violet); margin-bottom:8px;" size="28"></i>
+                <div style="font-weight:600; font-size:0.9rem;" id="resume-upload-status">Drag & Drop Resume PDF here</div>
+                <div style="font-size:0.75rem; color:var(--text-secondary);">AI constructs questions matching your work history</div>
+              </div>
+            </div>
+
+            <!-- Setup options -->
+            <div style="display:flex; flex-direction:column; gap:16px;">
+              <!-- 1. Round Type -->
+              <div>
+                <div style="font-size:0.8rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase; margin-bottom:8px;">1. Interview Round Type</div>
+                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;">
+                  <button class="setup-option-card selected" id="opt-round-behavioral" onclick="selectRound('behavioral')">
+                    <i data-lucide="speech" class="text-violet"></i>
+                    <div style="text-align:left; font-size:0.85rem; font-weight:600;">HR / Behavioral</div>
+                  </button>
+                  <button class="setup-option-card" id="opt-round-coding" onclick="selectRound('coding')">
+                    <i data-lucide="code-2" class="text-cyan"></i>
+                    <div style="text-align:left; font-size:0.85rem; font-weight:600;">Technical Coding</div>
+                  </button>
+                  <button class="setup-option-card" id="opt-round-sysdesign" onclick="selectRound('sysdesign')">
+                    <i data-lucide="milestone" class="text-emerald"></i>
+                    <div style="text-align:left; font-size:0.85rem; font-weight:600;">System Design</div>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 2. Interviewer Persona -->
+              <div>
+                <div style="font-size:0.8rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase; margin-bottom:8px;">2. Interviewer Persona</div>
+                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;" id="setup-persona-grid">
+                  <!-- Injected via JavaScript -->
+                </div>
+              </div>
+
+              <!-- 3. Company Format -->
+              <div>
+                <div style="font-size:0.8rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase; margin-bottom:8px;">3. Target Company Style</div>
+                <select class="text-input-field" id="setup-company-select" style="width: 100%; cursor: pointer;">
+                  <option value="google">Google (Algorithmic Focus & Math)</option>
+                  <option value="amazon">Amazon (Leadership Principles Focus)</option>
+                  <option value="meta">Meta (Fast-Paced Speed Coding)</option>
+                  <option value="startup">Sleek Startup (Pragmatic Architecture & Autonomy)</option>
+                </select>
+              </div>
+
+              <button class="btn btn-primary" onclick="launchArena()" style="width:100%; padding:14px; margin-top:10px;">
+                <i data-lucide="play"></i>
+                Launch Interview Arena
+              </button>
+            </div>
+          </div>
+
+          <!-- History panel -->
+          <div class="glass-panel" style="padding:24px;">
+            <h3 style="font-family: var(--font-heading); font-weight: 700; font-size:1.25rem; margin-bottom: 16px;">Recent Sessions</h3>
+            <div style="display:flex; flex-direction:column; gap:12px;" id="dashboard-recent-sessions">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. PRACTICE ARENA VIEW -->
+      <div class="app-view" id="view-arena">
+        <!-- Control Header -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+          <div>
+            <h2 id="arena-session-title" style="font-family:var(--font-heading); font-weight:800; font-size:1.4rem;">Mock Session</h2>
+            <div id="arena-session-subtitle" style="font-size:0.85rem; color:var(--text-secondary);">Target: Google Style Coding</div>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button class="btn btn-secondary" onclick="pauseSession()">
+              <i data-lucide="pause"></i>
+              Pause
+            </button>
+            <button class="btn btn-primary btn-cyan" onclick="finishInterview()">
+              <i data-lucide="check-circle-2"></i>
+              Finish & Evaluate
+            </button>
+          </div>
+        </div>
+
+        <div class="arena-layout">
+          <!-- Left Column: Interviewer Video and Audio metrics -->
+          <div class="arena-left">
+            <div class="glass-panel" style="padding:20px; display:flex; flex-direction:column; gap:16px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <i data-lucide="bot" class="text-cyan"></i>
+                  <span id="arena-interviewer-name" style="font-weight:700;">Strict Sarah</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.05); padding:2px 8px; border-radius:4px; font-size:0.75rem;" id="arena-interviewer-role">Technical Lead</div>
+              </div>
+
+              <!-- AI Video Avatar -->
+              <div class="avatar-card" style="aspect-ratio: 16/10;">
+                <div class="avatar-speaking-glow" id="arena-avatar-glow"></div>
+                <div class="avatar-video-placeholder">
+                  <span class="avatar-image" id="arena-avatar-emoji">🤨</span>
+                  <span style="font-size: 0.8rem; font-weight: 500;">AI INTERVIEWER STREAM</span>
+                </div>
+              </div>
+
+              <!-- Waveform -->
+              <div class="wave-container" id="arena-wave-container">
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+              </div>
+
+              <!-- Speech State -->
+              <div style="display:flex; justify-content:center;">
+                <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); padding:4px 12px; border-radius:9999px; font-size:0.8rem; font-weight:600; display:flex; align-items:center; gap:6px;">
+                  <span id="arena-status-indicator" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--accent-cyan);"></span>
+                  <span id="arena-status-text">AI is thinking...</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Webcam Feed of Candidate -->
+            <div class="camera-card">
+              <div class="camera-placeholder" id="webcam-placeholder-box">
+                <i data-lucide="video-off" style="color:var(--text-muted); margin-bottom:8px;"></i>
+                <span style="font-size: 0.75rem; color:var(--text-secondary);">Webcam Feed (Inactive)</span>
+                <button class="btn btn-secondary" onclick="enableWebcam()" style="font-size: 0.7rem; padding: 6px 12px; margin-top:8px;">Enable Camera</button>
+              </div>
+              <video class="camera-video" id="webcam-video-element" autoplay playsinline></video>
+            </div>
+
+            <!-- Speech metrics widget -->
+            <div class="glass-panel" style="padding:16px;">
+              <div style="font-size:0.75rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase; margin-bottom:12px;">Real-time Speech Metrics</div>
+              <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px;">
+                <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:8px; padding:8px; text-align:center;">
+                  <div id="arena-pace-val" style="font-size:1rem; font-weight:700;">--</div>
+                  <div style="font-size:0.6rem; color:var(--text-secondary); text-transform:uppercase;">Speaking Pace</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:8px; padding:8px; text-align:center;">
+                  <div id="arena-filler-val" style="font-size:1rem; font-weight:700;">0</div>
+                  <div style="font-size:0.6rem; color:var(--text-secondary); text-transform:uppercase;">Filler Count</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:8px; padding:8px; text-align:center;">
+                  <div id="arena-confidence-val" style="font-size:1rem; font-weight:700;">0%</div>
+                  <div style="font-size:0.6rem; color:var(--text-secondary); text-transform:uppercase;">Confidence</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Interactive Work Environment -->
+          <div class="arena-right glass-panel">
+            
+            <!-- Work Environment Subviews -->
+
+            <!-- Subview A: Behavioral Rounds Chat Transcripts -->
+            <div id="arena-sub-behavioral" style="display:flex; flex-direction:column; height:100%; padding:20px; background:rgba(0, 0, 0, 0.2);">
+              <div style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:16px; margin-bottom:20px;" id="arena-dialogue-transcript">
+                <!-- Dialogue elements injected -->
+              </div>
+              <div class="demo-input-container">
+                <button class="speech-btn" id="arena-mic-btn" style="width:55px; height:55px;">
+                  <i data-lucide="mic"></i>
+                </button>
+                <input type="text" class="text-input-field" id="arena-text-input" placeholder="Speak your answer or type here...">
+                <button class="btn btn-primary" id="arena-send-btn" style="height:55px;">
+                  <i data-lucide="send"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Subview B: Technical Code Editor (Loaded Monaco) -->
+            <div id="arena-sub-coding" style="display:none; flex-direction:column; height:100%;">
+              <!-- Problem Header details -->
+              <div style="padding:16px; background:rgba(6,3,20,0.5); border-bottom:1px solid var(--border-color);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                  <h3 id="code-problem-title" style="font-size:1.15rem; font-weight:700;">Two Sum</h3>
+                  <span id="code-problem-diff" style="font-size:0.75rem; background:rgba(16,185,129,0.1); color:var(--accent-emerald); padding:2px 8px; border-radius:4px; font-weight:600;">Easy</span>
+                </div>
+                <div id="code-problem-desc" style="font-size:0.85rem; color:var(--text-secondary); max-height:100px; overflow-y:auto; background:rgba(0,0,0,0.1); padding:8px; border-radius:6px; border:1px solid var(--border-color);">
+                  Problem instructions go here.
+                </div>
+              </div>
+              
+              <!-- Code Editor workspace -->
+              <div class="editor-container" id="monaco-code-container">
+                <!-- Monaco editor iframe or raw elements will mount here -->
+              </div>
+
+              <!-- Output execution footer console -->
+              <div style="height:150px; background:rgba(6,3,20,0.85); border-top:1px solid var(--border-color); padding:16px; display:flex; flex-direction:column;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                  <div style="font-size:0.75rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase;">Console & Test Cases</div>
+                  <div style="display:flex; gap:8px;">
+                    <button class="btn btn-secondary" onclick="simulateRunCode()" style="font-size:0.75rem; padding:6px 12px;">Run Code</button>
+                    <button class="btn btn-primary" onclick="simulateSubmitCode()" style="font-size:0.75rem; padding:6px 12px; background:var(--accent-cyan);">Submit Code</button>
+                  </div>
+                </div>
+                <div id="coding-console-logs" style="flex:1; overflow-y:auto; font-family:var(--font-code); font-size:0.8rem; background:rgba(0,0,0,0.3); border-radius:6px; border:1px solid var(--border-color); padding:8px; color:var(--text-secondary);">
+                  Console initialized. Write code and run tests.
+                </div>
+              </div>
+            </div>
+
+            <!-- Subview C: System Design Canvas Board -->
+            <div id="arena-sub-sysdesign" style="display:none; flex-direction:column; height:100%;">
+              <div class="canvas-toolbar">
+                <button class="canvas-tool-btn active" id="tool-select" onclick="setCanvasTool('select')" title="Select Node">
+                  <i data-lucide="mouse-pointer"></i>
+                </button>
+                <button class="canvas-tool-btn" id="tool-rect" onclick="setCanvasTool('rect')" title="Add Service/App">
+                  <i data-lucide="server"></i>
+                </button>
+                <button class="canvas-tool-btn" id="tool-circle" onclick="setCanvasTool('circle')" title="Add Database">
+                  <i data-lucide="database"></i>
+                </button>
+                <button class="canvas-tool-btn" id="tool-cloud" onclick="setCanvasTool('cloud')" title="Add Cache/Load Balancer">
+                  <i data-lucide="cloud"></i>
+                </button>
+                <button class="canvas-tool-btn" id="tool-arrow" onclick="setCanvasTool('arrow')" title="Draw Connection">
+                  <i data-lucide="git-commit"></i>
+                </button>
+                <button class="canvas-tool-btn" id="tool-text" onclick="setCanvasTool('text')" title="Add Label">
+                  <i data-lucide="type"></i>
+                </button>
+                <button class="canvas-tool-btn text-rose" onclick="clearCanvasBoard()" style="margin-left:auto;" title="Clear Board">
+                  <i data-lucide="trash-2"></i>
+                </button>
+              </div>
+              <div class="canvas-workspace">
+                <canvas id="sysdesign-canvas-element" style="width: 100%; height: 100%; display: block;"></canvas>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. FEEDBACK REPORT VIEW -->
+      <div class="app-view" id="view-feedback">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+          <div>
+            <h2 style="font-family:var(--font-heading); font-size:1.8rem; font-weight:800; margin-bottom:4px;">Evaluation Report</h2>
+            <div style="color:var(--text-secondary); font-size:0.9rem;" id="feedback-metadata">Candidate: Jane Doe • Target: Google Style Coding Mock</div>
+          </div>
+          <button class="btn btn-primary" onclick="switchView('dashboard')">
+            <i data-lucide="arrow-left"></i>
+            Back to Dashboard
+          </button>
+        </div>
+
+        <div class="report-grid">
+          <!-- Left Column Score Card -->
+          <div class="glass-panel" style="padding:24px; display:flex; flex-direction:column; gap:20px; align-items:center; text-align:center;">
+            <span class="badge-pass">PASS / OFFER READY</span>
+            
+            <div style="position:relative; width:150px; height:150px; display:flex; justify-content:center; align-items:center;">
+              <!-- Outer circular progress bar -->
+              <svg width="150" height="150" style="transform: rotate(-90deg);">
+                <circle cx="75" cy="75" r="65" stroke="rgba(255,255,255,0.05)" stroke-width="12" fill="transparent"/>
+                <circle id="report-circular-score" cx="75" cy="75" r="65" stroke="var(--accent-cyan)" stroke-width="12" fill="transparent" stroke-linecap="round" stroke-dasharray="408" stroke-dashoffset="65"/>
+              </svg>
+              <div style="position:absolute; font-family:var(--font-heading); font-size:2.8rem; font-weight:800; color:#fff;" id="report-score-val">84</div>
+            </div>
+
+            <div>
+              <h3 style="font-family:var(--font-heading); font-weight:700; font-size:1.25rem;">Overall Interview Score</h3>
+              <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:6px;">Excellent algorithmic logic with structured communication.</p>
+            </div>
+
+            <!-- Detailed Radar performance parameters -->
+            <div style="width:100%; text-align:left; display:flex; flex-direction:column; gap:12px; padding-top:12px; border-top:1px solid var(--border-color);">
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
+                  <span>Technical Correctness</span>
+                  <span class="text-cyan" id="rep-param-tech">85%</span>
+                </div>
+                <div style="width:100%; height:6px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden;">
+                  <div id="rep-bar-tech" style="width:85%; height:100%; background:var(--accent-cyan);"></div>
+                </div>
+              </div>
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
+                  <span>Structural Communication</span>
+                  <span class="text-violet" id="rep-param-comm">90%</span>
+                </div>
+                <div style="width:100%; height:6px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden;">
+                  <div id="rep-bar-comm" style="width:90%; height:100%; background:var(--accent-violet);"></div>
+                </div>
+              </div>
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
+                  <span>Pacing & Calmness</span>
+                  <span class="text-emerald" id="rep-param-pace">80%</span>
+                </div>
+                <div style="width:100%; height:6px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden;">
+                  <div id="rep-bar-pace" style="width:80%; height:100%; background:var(--accent-emerald);"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column Detailed Insights -->
+          <div class="glass-panel" style="padding:24px; display:flex; flex-direction:column; gap:20px;">
+            <!-- Strengths and Weaknesses -->
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+              <div>
+                <h4 style="font-family:var(--font-heading); font-weight:700; color:var(--accent-emerald); font-size:1rem; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                  <i data-lucide="check-circle" size="16"></i> Key Strengths
+                </h4>
+                <ul style="font-size:0.85rem; color:var(--text-secondary); display:flex; flex-direction:column; gap:8px;" id="feedback-strengths">
+                  <!-- Injected via JavaScript -->
+                </ul>
+              </div>
+              <div>
+                <h4 style="font-family:var(--font-heading); font-weight:700; color:var(--accent-rose); font-size:1rem; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                  <i data-lucide="alert-triangle" size="16"></i> Areas of Improvement
+                </h4>
+                <ul style="font-size:0.85rem; color:var(--text-secondary); display:flex; flex-direction:column; gap:8px;" id="feedback-weaknesses">
+                  <!-- Injected via JavaScript -->
+                </ul>
+              </div>
+            </div>
+
+            <!-- Question/Answer Analysis comparisons -->
+            <div style="border-top:1px solid var(--border-color); padding-top:16px;">
+              <h4 style="font-family:var(--font-heading); font-weight:700; font-size:1rem; margin-bottom:12px;">Answer Breakdown & Critique</h4>
+              <div style="background:rgba(0,0,0,0.15); border:1px solid var(--border-color); border-radius:8px; padding:16px;" id="feedback-critique-box">
+                <!-- Critique breakdown details -->
+              </div>
+            </div>
+
+            <!-- Personalized Roadmap Recommendations -->
+            <div style="border-top:1px solid var(--border-color); padding-top:16px;">
+              <h4 style="font-family:var(--font-heading); font-weight:700; font-size:1rem; margin-bottom:10px; color:var(--accent-cyan);">Recommended Roadmap & Practice Topics</h4>
+              <div style="display:flex; gap:10px;" id="feedback-roadmap-container">
+                <!-- Recommendation tags -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. PERFORMANCE / ANALYTICS VIEW -->
+      <div class="app-view" id="view-analytics">
+        <h2 style="font-family: var(--font-heading); font-size: 1.8rem; font-weight:800; margin-bottom: 24px;">Practice Analytics Dashboard</h2>
+        
+        <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:24px; margin-bottom:24px;">
+          <div class="glass-panel" style="padding:20px; height:380px; display:flex; flex-direction:column;">
+            <h3 style="font-family:var(--font-heading); font-weight:700; font-size:1.1rem; margin-bottom:12px;">Interview Score Trajectory</h3>
+            <div style="flex:1; position:relative;">
+              <canvas id="chart-scores-line"></canvas>
+            </div>
+          </div>
+          
+          <div class="glass-panel" style="padding:20px; height:380px; display:flex; flex-direction:column;">
+            <h3 style="font-family:var(--font-heading); font-weight:700; font-size:1.1rem; margin-bottom:12px;">Filler Words & Speech Speed Distribution</h3>
+            <div style="flex:1; position:relative;">
+              <canvas id="chart-speech-scatter"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-panel" style="padding:20px;">
+          <h3 style="font-family:var(--font-heading); font-weight:700; font-size:1.1rem; margin-bottom:16px;">Skill Strengths & Domain-wise Performance</h3>
+          <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:20px;">
+            <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:10px; padding:16px;">
+              <div style="font-family:var(--font-heading); font-size:0.9rem; font-weight:700; margin-bottom:10px;">Coding Algorithm Speed</div>
+              <div style="font-size:1.8rem; font-weight:800; color:var(--accent-cyan);">24 min</div>
+              <div style="font-size:0.75rem; color:var(--accent-emerald);">↓ 6 minutes faster than average candidate</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:10px; padding:16px;">
+              <div style="font-family:var(--font-heading); font-size:0.9rem; font-weight:700; margin-bottom:10px;">System Scalability Score</div>
+              <div style="font-size:1.8rem; font-weight:800; color:var(--accent-violet);">86%</div>
+              <div style="font-size:0.75rem; color:var(--text-secondary);">High coverage of cache & load balancer nodes</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:10px; padding:16px;">
+              <div style="font-family:var(--font-heading); font-size:0.9rem; font-weight:700; margin-bottom:10px;">Behavioral Leadership Rating</div>
+              <div style="font-size:1.8rem; font-weight:800; color:var(--accent-emerald);">Strong Hire</div>
+              <div style="font-size:0.75rem; color:var(--accent-emerald);">STAR structural method was consistently followed</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Custom Alert/Modal Popup Dialogue -->
+  <div class="modal-backdrop" id="custom-modal-backdrop">
+    <div class="glass-panel modal-card">
+      <h3 style="font-family:var(--font-heading); font-weight:700; font-size:1.3rem; margin-bottom:12px;" id="modal-title">Notification</h3>
+      <p style="color:var(--text-secondary); font-size:0.95rem; margin-bottom:24px;" id="modal-message">Session paused. Ready to resume?</p>
+      <div style="display:flex; justify-content:flex-end; gap:12px;">
+        <button class="btn btn-secondary" id="modal-btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" id="modal-btn-action" onclick="closeModal()">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/speech.js"></script>
+  <script src="js/canvas.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // Create icons
+    lucide.createIcons();
+  </script>
+</body>
+</html>
