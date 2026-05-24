@@ -43,6 +43,20 @@ body {
   line-height: 1.6;
 }
 
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+img,
+svg,
+canvas,
+video {
+  max-width: 100%;
+}
+
 /* Background Gradients */
 .bg-glow-sphere {
   position: absolute;
@@ -98,6 +112,9 @@ body {
   transition: var(--transition-smooth);
   text-decoration: none;
   gap: 8px;
+  min-height: 44px;
+  max-width: 100%;
+  white-space: nowrap;
 }
 
 .btn-primary {
@@ -155,6 +172,7 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 24px;
 }
 
 .logo {
@@ -166,6 +184,7 @@ header {
   font-weight: 800;
   color: #fff;
   text-decoration: none;
+  flex: 0 0 auto;
 }
 
 .logo span {
@@ -178,6 +197,8 @@ header {
   display: flex;
   gap: 32px;
   list-style: none;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .nav-links a {
@@ -220,12 +241,11 @@ header {
 
 .hero-title {
   font-family: var(--font-heading);
-  font-size: 3.5rem;
+  font-size: clamp(2.35rem, 6vw, 3.5rem);
   font-weight: 800;
   line-height: 1.15;
   margin-bottom: 24px;
   max-width: 800px;
-  letter-spacing: -0.02em;
 }
 
 .hero-title span {
@@ -236,7 +256,7 @@ header {
 
 .hero-subtitle {
   color: var(--text-secondary);
-  font-size: 1.25rem;
+  font-size: clamp(1rem, 2.4vw, 1.25rem);
   max-width: 650px;
   margin-bottom: 40px;
   font-weight: 400;
@@ -258,7 +278,7 @@ header {
 
 .teaser-dashboard {
   display: grid;
-  grid-template-columns: 350px 1fr;
+  grid-template-columns: minmax(260px, 350px) minmax(0, 1fr);
   min-height: 520px;
   border-radius: 20px;
   overflow: hidden;
@@ -281,6 +301,7 @@ header {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  min-width: 0;
 }
 
 .teaser-title {
@@ -290,6 +311,8 @@ header {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+  flex-wrap: wrap;
 }
 
 .teaser-subtitle {
@@ -461,10 +484,12 @@ header {
   display: flex;
   gap: 12px;
   align-items: center;
+  min-width: 0;
 }
 
 .speech-btn {
   width: 50px;
+  min-width: 50px;
   height: 50px;
   border-radius: 50%;
   display: flex;
@@ -491,6 +516,7 @@ header {
 
 .text-input-field {
   flex: 1;
+  min-width: 0;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border-color);
   border-radius: 12px;
@@ -563,7 +589,7 @@ header {
 
 .section-title {
   font-family: var(--font-heading);
-  font-size: 2.25rem;
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
   font-weight: 800;
   text-align: center;
   margin-bottom: 12px;
@@ -578,7 +604,7 @@ header {
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
   gap: 24px;
 }
 
@@ -624,7 +650,7 @@ header {
 /* Multi-environment Mockup Section */
 .mockup-showcase {
   display: grid;
-  grid-template-columns: 1fr 1.2fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
   gap: 40px;
   align-items: center;
 }
@@ -639,6 +665,7 @@ header {
   display: flex;
   gap: 12px;
   margin-bottom: 10px;
+  flex-wrap: wrap;
 }
 
 .mockup-tab-btn {
@@ -662,6 +689,7 @@ header {
 .mockup-visual {
   width: 100%;
   aspect-ratio: 1.4;
+  min-height: 280px;
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 20px 50px rgba(0,0,0,0.5);
@@ -693,7 +721,7 @@ header {
 /* Pricing / Personas Section */
 .pricing-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
   gap: 24px;
   max-width: 1000px;
   margin: 0 auto;
@@ -886,6 +914,7 @@ footer {
   border-top: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
+  gap: 24px;
   font-size: 0.85rem;
   color: var(--text-muted);
 }
@@ -1245,22 +1274,291 @@ footer {
 }
 
 /* Responsiveness overrides */
+@media (max-width: 1100px) {
+  .nav-container,
+  .hero-section,
+  .section,
+  .footer-container,
+  .footer-bottom {
+    max-width: 100%;
+  }
+
+  .teaser-dashboard {
+    grid-template-columns: 300px minmax(0, 1fr);
+  }
+}
+
 @media (max-width: 900px) {
+  header {
+    position: relative;
+  }
+
+  .nav-container {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .logo {
+    margin-right: auto;
+  }
+
+  .nav-links {
+    order: 3;
+    width: 100%;
+    gap: 16px 24px;
+  }
+
   .teaser-dashboard {
     grid-template-columns: 1fr;
   }
+
+  .teaser-sidebar {
+    border-right: 0;
+    border-bottom: 1px solid var(--border-color);
+  }
+
   .mockup-showcase {
     grid-template-columns: 1fr;
+    gap: 28px;
   }
+
   .footer-container {
     grid-template-columns: 1fr 1fr;
   }
+
+  .report-grid,
+  .arena-layout,
+  .setup-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .app-container {
+    min-height: 100vh;
+    height: auto;
+    flex-direction: column;
+  }
+
+  .app-sidebar {
+    width: 100%;
+    border-right: 0;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .app-content {
+    min-height: 0;
+  }
 }
+
+@media (max-width: 720px) {
+  header {
+    padding: 12px 0;
+  }
+
+  .nav-container {
+    padding: 0 16px;
+    gap: 14px;
+  }
+
+  .logo {
+    font-size: 1.25rem;
+  }
+
+  .nav-links {
+    display: none;
+  }
+
+  #header-launch-btn {
+    padding: 10px 14px;
+    font-size: 0.85rem;
+  }
+
+  .hero-section {
+    padding: 56px 16px 28px !important;
+  }
+
+  .hero-title {
+    max-width: 11ch;
+  }
+
+  .hero-ctas {
+    width: 100%;
+    max-width: 360px;
+    flex-direction: column;
+    margin-bottom: 36px;
+  }
+
+  .hero-ctas .btn,
+  .pricing-card .btn {
+    width: 100%;
+  }
+
+  .teaser-container {
+    margin-top: 36px !important;
+  }
+
+  .teaser-dashboard {
+    border-radius: 14px;
+    min-height: 0;
+  }
+
+  .teaser-sidebar,
+  .teaser-content,
+  .feature-card,
+  .pricing-card {
+    padding: 20px;
+  }
+
+  .persona-btn {
+    padding: 10px 12px;
+  }
+
+  .demo-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .section {
+    padding: 56px 16px;
+  }
+
+  .section-subtitle {
+    margin-bottom: 32px;
+  }
+
+  .mockup-tabs {
+    gap: 6px;
+  }
+
+  .mockup-tab-btn {
+    flex: 1 1 100%;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .mockup-tab-btn.active {
+    border-color: var(--accent-cyan);
+    background: rgba(6, 182, 212, 0.08);
+  }
+
+  .mockup-visual {
+    aspect-ratio: auto;
+    min-height: 360px !important;
+  }
+
+  .mockup-slide {
+    padding: 16px;
+    overflow: auto;
+  }
+
+  #mockup-canvas > div {
+    min-width: 460px;
+    min-height: 280px;
+    transform: scale(0.68);
+    transform-origin: center;
+  }
+
+  .pricing-price {
+    font-size: 2rem;
+  }
+
+  .faq-question {
+    padding: 18px;
+    gap: 16px;
+    align-items: flex-start;
+    font-size: 1rem;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 @media (max-width: 600px) {
   .hero-title {
-    font-size: 2.5rem;
+    max-width: 100%;
   }
+
+  .badge-tag {
+    max-width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .demo-input-container {
+    display: grid !important;
+    grid-template-columns: 50px 1fr 50px;
+    gap: 8px !important;
+  }
+
+  .demo-input-container .btn {
+    width: 50px;
+    min-width: 50px;
+    padding: 0 !important;
+  }
+
+  .text-input-field {
+    padding: 12px 14px;
+  }
+
+  .mockup-visual pre {
+    font-size: 0.72rem !important;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
   .footer-container {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 420px) {
+  .btn {
+    width: 100%;
+    white-space: normal;
+  }
+
+  #header-launch-btn {
+    width: auto;
+  }
+
+  .nav-container {
+    justify-content: space-between;
+  }
+
+  .logo span {
+    max-width: 138px;
+  }
+
+  .teaser-title {
+    font-size: 1rem;
+  }
+
+  .avatar-image {
+    font-size: 3rem;
+  }
+
+  .demo-input-container {
+    grid-template-columns: 44px 1fr 44px;
+  }
+
+  .speech-btn,
+  .demo-input-container .btn {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+  }
+
+  .metric-mini-card {
+    padding: 12px;
+  }
+
+  .feature-card h3,
+  .pricing-header h3 {
+    font-size: 1.15rem;
+  }
+
+  #mockup-canvas > div {
+    transform: scale(0.56);
   }
 }
